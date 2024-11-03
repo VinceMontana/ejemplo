@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/nodejs/examples.git', branch: 'main'
+                sh "ls -last"
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                echo 'Compilando el proyecto...'
+                // Aquí se incluirían comandos para compilar el proyecto, por ejemplo:
+                // sh 'mvn clean compile'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Ejecutando pruebas...'
+                // Aquí se incluirían comandos para pruebas, por ejemplo:
+                // sh 'mvn test'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Desplegando a producción...'
+                // Aquí se incluirían comandos para desplegar, por ejemplo:
+                // sh 'mvn deploy'
+            }
+        }
+    }
+}
