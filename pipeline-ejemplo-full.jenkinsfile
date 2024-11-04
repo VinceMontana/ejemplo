@@ -20,12 +20,11 @@ pipeline {
     }
 
     environment {
-        DOCKER_REGISTRY = 'VinceeMontana'
         DOCKER_IMAGE = "MiApp"
     }
 
     stages {
-        stage('Configurando pipeline') {
+        stage('Checkout') {
             steps {
                 git url: REPOSITORY, branch: BRANCH
                 sh 'ls -last'
@@ -67,28 +66,29 @@ pipeline {
                 }
             }
         }
-
+ 
         stage('Crear Imagen Docker') {
             steps {
                 script {
-
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        // Realiza el login a Docker
                         sh '''
-                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                            docker build -t $DOCKER_USERNAME/$DOCKER_IMAGE:$BUILD_NUMBER .
                         '''
                     }
-
-                    sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER} ."
                 }
             }
         }
 
         stage('Subir a un repositorio de artefactos') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh 'echo $PASSWORD | docker login -u $USERNAME --password-stdin'
-                    sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh '''
+                            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                            docker push $DOCKER_USERNAME/$DOCKER_IMAGE:$BUILD_NUMBER
+                        '''
+                    }
                 }
             }
         }
