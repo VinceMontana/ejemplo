@@ -20,7 +20,7 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = "MiApp"
+        APP_NAME = "myapp"
     }
 
     stages {
@@ -73,7 +73,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         sh '''
                             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-                            docker build -t $DOCKER_USERNAME/$DOCKER_IMAGE:$BUILD_NUMBER .
+                            docker build -t $DOCKER_USERNAME/$APP_NAME:$BUILD_NUMBER .
                         '''
                     }
                 }
@@ -86,7 +86,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         sh '''
                             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-                            docker push $DOCKER_USERNAME/$DOCKER_IMAGE:$BUILD_NUMBER
+                            docker push $DOCKER_USERNAME/$APP_NAME:$BUILD_NUMBER
                         '''
                     }
                 }
@@ -96,9 +96,11 @@ pipeline {
         stage('Desplegar en Kubernetes') {
             steps {
                 script {
-                    sh """
-                    kubectl set image deployment/mi-app-deployment mi-app-container=${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER} --record
-                    """
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh '''
+                            kubectl set image deployment/mi-app-deployment mi-app-container=$DOCKER_USERNAME/APP_NAME:$BUILD_NUMBER --record
+                        '''
+                    }
                 }
             }
         }
