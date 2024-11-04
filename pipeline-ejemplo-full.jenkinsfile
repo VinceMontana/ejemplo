@@ -23,7 +23,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: REPOSITORIO, branch: 'main'
+                git url: REPOSITORIO, branch: 'master'
                 sh "ls -last"
             }
         }
