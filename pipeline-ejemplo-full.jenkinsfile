@@ -1,5 +1,19 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+                - name: jenkins-agent
+                  image: vincemontana/jenkins-agent-node-docker
+                  command:
+                    - cat
+                  tty: true
+            """
+        }
+    }
 
     environment {
         DOCKER_REGISTRY = 'VinceeMontana'
