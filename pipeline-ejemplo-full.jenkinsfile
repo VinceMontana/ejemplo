@@ -1,5 +1,11 @@
 pipeline {
     agent any
+
+    environment {
+        DOCKER_REGISTRY = 'VinceeMontana'
+        DOCKER_IMAGE = "MiApp"
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -8,28 +14,69 @@ pipeline {
             }
         }
         
-        stage('Build') {
+        stage('Instalación de dependencias') {
             steps {
-                echo 'Compilando el proyecto...'
-                // Aquí se incluirían comandos para compilar el proyecto, por ejemplo:
-                sh 'mvn clean compile'
+                script {
+                    sh 'npm install'
+                }
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                script {
+                    sh 'npm run lint'
+                }
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Ejecutando pruebas...'
-                // Aquí se incluirían comandos para pruebas, por ejemplo:
-                sh 'mvn test'
+                script {
+                    sh 'npm test'
+                }
             }
         }
 
-        stage('Deploy') {
+        stage('Build') {
             steps {
-                echo 'Desplegando a producción...'
-                // Aquí se incluirían comandos para desplegar, por ejemplo:
-                sh 'mvn deploy'
+                script {
+                    sh 'npm run build'
+                }
             }
+        }
+
+        stage('Crear Imagen Docker') {
+            steps {
+                script {
+                    sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER} ."
+                }
+            }
+        }
+
+        stage('Subir a un repositorio de artefactos') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh 'echo $PASSWORD | docker login -u $USERNAME --password-stdin'
+                    sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                }
+            }
+        }
+
+        stage('Desplegar en Kubernetes') {
+            steps {
+                script {
+                    sh """
+                    kubectl set image deployment/mi-app-deployment mi-app-container=${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER} --record
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs() // Limpia el workspace después de cada ejecución
         }
     }
 }
