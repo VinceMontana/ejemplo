@@ -4,18 +4,15 @@ pipeline {
             yaml """
             apiVersion: v1
             kind: Pod
-            metadata:
-              labels:
-                jenkins: jenkins-agent-node-docker
             spec:
               containers:
-              - name: jenkins-agent-node-docker
+              - name: jnlp
                 image: vincemontana/jenkins-agent-node-docker
                 command:
                 - cat
                 tty: true
               """
-              defaultContainer 'jenkins-agent-node-docker'
+              defaultContainer 'jnlp'
         }
     }
 
