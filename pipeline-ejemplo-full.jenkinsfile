@@ -27,10 +27,11 @@ pipeline {
         stage('Configurando pipeline') {
             steps {
                 git url: REPOSITORIO, branch: 'master'
-                sh "ls -last"
-                sh "node -v"
-                sh "npm -v"
-                sh "docker -v"
+                sh 'ls -last'
+                sh 'which node'
+                sh 'which npm'
+                sh 'node -v'
+                sh 'npm -v'
             }
         }
         
