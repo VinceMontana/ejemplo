@@ -27,7 +27,7 @@ pipeline {
     stages {
         stage('Configurando pipeline') {
             steps {
-                git url: REPOSITORIO, branch: BRANCH
+                git url: REPOSITORY, branch: BRANCH
                 sh 'ls -last'
                 sh 'which node'
                 sh 'which npm'
