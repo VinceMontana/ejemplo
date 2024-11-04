@@ -9,12 +9,13 @@ pipeline {
                 jenkins: jenkins-agent-node-docker
             spec:
               containers:
-              - name: node
+              - name: jenkins-agent-node-docker
                 image: vincemontana/jenkins-agent-node-docker
                 command:
                 - cat
                 tty: true
               """
+              defaultContainer 'jenkins-agent-node-docker'
         }
     }
 
