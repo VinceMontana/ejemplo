@@ -76,7 +76,7 @@ pipeline {
 
     post {
         always {
-            cleanWs() // Limpia el workspace después de cada ejecución
+            //cleanWs() // Limpia el workspace después de cada ejecución
         }
     }
 }
