@@ -10,7 +10,7 @@ pipeline {
             spec:
               containers:
               - name: node
-                image: vincemontana/jenkins-agent-node-docker  // Cambia a la imagen que tienes
+                image: vincemontana/jenkins-agent-node-docker
                 command:
                 - cat
                 tty: true
